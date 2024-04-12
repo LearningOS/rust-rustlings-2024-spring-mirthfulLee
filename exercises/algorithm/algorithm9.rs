@@ -2,10 +2,10 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
+use std::mem::swap;
 
 pub struct Heap<T>
 where
@@ -38,6 +38,15 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+        self.count += 1;
+        self.items.push(value);
+        let mut idx = self.count;
+        let mut parent_idx = self.parent_idx(idx);
+        while idx > 1 && (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+            self.items.swap(idx, parent_idx);
+            idx = parent_idx;
+            parent_idx = self.parent_idx(idx);
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,7 +67,14 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
-		0
+        // suppose the caller have checked that children are present
+        let l_child = self.left_child_idx(idx);
+        let r_child = self.right_child_idx(idx);
+        if r_child <= self.count && (self.comparator)(&self.items[r_child], &self.items[l_child]) {
+            r_child
+        } else {
+            l_child
+        }
     }
 }
 
@@ -85,7 +101,23 @@ where
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        let result = self.items.pop();
+        self.count -= 1;
+        let mut idx = 1;
+        while self.children_present(idx) {
+            let smallest_child_idx = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest_child_idx], &self.items[idx]) {
+                self.items.swap(smallest_child_idx, idx);
+                idx = smallest_child_idx;
+            } else {
+                break;
+            }
+        }
+        result
     }
 }
 
